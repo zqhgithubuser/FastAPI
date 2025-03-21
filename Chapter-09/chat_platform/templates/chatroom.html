@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Chat</title>
+  </head>
+
+  <body>
+    <h1>WebSocket Chat</h1>
+    <h2>Your ID: <span id="ws-id"></span></h2>
+    <form action="" onsubmit="sendMessage(event)">
+      <input type="text" id="messageText" autocomplete="off" />
+      <button>Send</button>
+    </form>
+    <ul id="messages"></ul>
+
+    <script>
+      var client_id = "{{ username }}";  // 获取当前用户的 ID
+      document.querySelector("#ws-id").textContent = client_id;  // 在页面中显示用户 ID
+
+      // 创建 WebSocket 连接
+      var ws = new WebSocket(`ws://localhost:8000/chatroom/${client_id}`);
+
+      // 当收到消息时触发的回调函数
+      ws.onmessage = function (event) {
+        var messages = document.getElementById("messages");
+        var message = document.createElement("li");
+        var data = JSON.parse(event.data);  // 解析收到的消息
+
+        // 根据发送者设置消息的样式
+        var data_message;
+        if (data.sender == "You") {
+          data_message = "You wrote: \n" + data.message;
+          message.style.textAlign = "right";
+          message.style.color = "blue";
+        } else if (data.sender == "system") {
+          data_message = data.message;
+          message.style.textAlign = "center";
+          message.style.color = "red";
+        } else {
+          data_message = data.sender + ":\n" + data.message;
+          message.style.textAlign = "left";
+          message.style.color = "green";
+        }
+
+        // 创建并添加消息内容
+        var content = document.createTextNode(data_message);
+        message.appendChild(content);
+        message.style.listStyle = "none";  // 去除列表项的样式
+        messages.appendChild(message);
+      };
+
+      // 发送消息的函数
+      function sendMessage(event) {
+        var input = document.getElementById("messageText");
+        ws.send(input.value);  // 发送消息
+        input.value = "";  // 清空输入框
+        event.preventDefault();  // 阻止默认表单提交行为
+      }
+    </script>
+  </body>
+</html>

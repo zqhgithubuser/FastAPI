@@ -1,0 +1,5 @@
+Babel==2.13.1
+fastapi==0.115.11
+pyinstrument==5.0.1
+slowapi==0.1.9
+starlette==0.46.1
